@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        @apply text-text-light dark:text-text-dark bg-gray-50 dark:bg-[#1C1C1E];
+        @apply transition-colors duration-200;
+    }
+
+    html,
+    body,
+    #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    body {
+        position: relative;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-white/70 dark:bg-black/70 backdrop-blur-apple
+    border border-white/20 dark:border-black/20
+    shadow-apple dark:shadow-apple-dark;
+    }
+
+    .btn-primary {
+        @apply px-6 py-3 bg-primary text-white font-semibold rounded-xl
+    hover:bg-primary-dark active:bg-primary-dark
+    dark:bg-primary-dark dark:hover:bg-primary
+    transition-all duration-200 ease-out
+    disabled:opacity-50 disabled:cursor-not-allowed
+    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+    dark:focus:ring-offset-[#1C1C1E];
+    }
+
+    .btn-secondary {
+        @apply px-6 py-3 bg-gray-100 text-gray-900 font-semibold rounded-xl
+    hover:bg-gray-200 active:bg-gray-200
+    transition-all duration-200 ease-out
+    disabled:opacity-50 disabled:cursor-not-allowed
+    focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2;
+    }
+
+    .input-field {
+        @apply w-full px-4 py-3 rounded-xl
+    border border-gray-200 dark:border-gray-800/50
+    bg-white dark:bg-[#1C1C1E]
+    text-gray-900 dark:text-white
+    focus:border-primary dark:focus:border-primary-light
+    focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary-light/20
+    placeholder-gray-400 dark:placeholder-gray-500
+    transition-all duration-200
+    disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+
+    .card {
+        @apply bg-white dark:bg-[#1C1C1E]
+    rounded-2xl
+    shadow-apple dark:shadow-apple-dark
+    border border-gray-200/10 dark:border-gray-800/10
+    transition-all duration-200;
+    }
+}
+
+/* Apple-style transitions */
+.fade-enter {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+        opacity 200ms ease-out,
+        transform 200ms ease-out;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: scale(0.95);
+    transition:
+        opacity 200ms ease-out,
+        transform 200ms ease-out;
+}
+
+@layer utilities {
+    .-z-1 {
+        z-index: -1;
+    }
+}
+
+#root {
+    isolation: isolate;
+    min-height: 100vh;
+    position: relative;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: transparent !important;
+}
+
+/* Customize NProgress bar */
+#nprogress .bar {
+    background: #007aff !important; /* Use your primary color */
+    height: 3px !important;
+}
+
+#nprogress .peg {
+    box-shadow:
+        0 0 10px #007aff,
+        0 0 5px #007aff !important;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

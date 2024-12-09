@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  buyer
+  seller
+  unknown
+}
+
+model User {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  password    String
+  name        String?
+  accountType AccountType @default(unknown)
+  profile     Profile?
+  products    Product[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Profile {
+  id                  String  @id @default(uuid())
+  phone               String?
+  address             String?
+  businessName        String?
+  businessDescription String?
+  profileImage        String?
+  emailNotifications  Boolean @default(true)
+  orderUpdates        Boolean @default(true)
+  user                User    @relation(fields: [userId], references: [id])
+  userId              String  @unique
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  price            Decimal  @db.Decimal(10, 2)
+  category         String
+  condition        String
+  brand            String?
+  model            String?
+  color            String?
+  quantity         Int      @default(1)
+  location         String
+  features         String[] @default([])
+  specifications   Json     @default("{}")
+  negotiable       Boolean  @default(false)
+  shipping         Boolean  @default(false)
+  warranty         Boolean  @default(false)
+  warrantyDuration String?
+  images           String[]
+  seller           User     @relation(fields: [sellerId], references: [id])
+  sellerId         String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

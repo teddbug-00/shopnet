@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAppSelector } from "../../store/hooks";
 import { Avatar } from "./Avatar";
+import { NotificationsMenu } from "./NotificationsMenu";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -58,6 +59,7 @@ export const Navbar = () => {
             <div className="flex items-center space-x-4">
               {isAuthenticated && !isAccountSetup ? (
                 <>
+                  <NotificationsMenu />
                   <ThemeToggle />
                   <Avatar />
                 </>

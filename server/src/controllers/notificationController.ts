@@ -15,13 +15,17 @@ export const getNotifications = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.id;
+    console.log("Fetching notifications for user:", userId);
+
     const notifications = await prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
+    console.log("Found notifications:", notifications);
     res.json(notifications);
   } catch (error) {
+    console.error("Error fetching notifications:", error);
     res.status(500).json({ error: "Failed to fetch notifications" });
   }
 };

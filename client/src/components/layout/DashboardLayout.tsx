@@ -34,33 +34,24 @@ const sidebarItems: SidebarItem[] = [
   { name: "Settings", icon: CogIcon, path: "/dashboard/settings" },
 ];
 
-export const DashboardLayout = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+const NotificationsButton = () => {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  const { items: notifications, unreadCount } = useAppSelector(
-    (state) => state.notifications,
-  );
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const {
+    items: notifications,
+    unreadCount,
+    isLoading,
+    error,
+  } = useAppSelector((state) => state.notifications);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const location = useLocation();
 
-  useEffect(() => {
-    dispatch(fetchNotifications());
-  }, [dispatch]);
+  console.log("Notifications State:", {
+    notifications,
+    unreadCount,
+    isLoading,
+    error,
+  });
 
-  const handleMarkAsRead = async (id: string) => {
-    await dispatch(markAsRead(id));
-  };
-
-  const handleMarkAllAsRead = async () => {
-    await dispatch(markAllAsRead());
-  };
-
-  const NotificationsButton = () => (
+  return (
     <div className="relative">
       <button
         onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -87,7 +78,7 @@ export const DashboardLayout = ({
                 <h3 className="font-semibold">Notifications</h3>
                 {unreadCount > 0 && (
                   <button
-                    onClick={handleMarkAllAsRead}
+                    onClick={() => dispatch(markAllAsRead())}
                     className="text-sm text-primary hover:text-primary-dark"
                   >
                     Mark all as read
@@ -124,7 +115,9 @@ export const DashboardLayout = ({
                         </div>
                         {!notification.read && (
                           <button
-                            onClick={() => handleMarkAsRead(notification.id)}
+                            onClick={() =>
+                              dispatch(markAsRead(notification.id))
+                            }
                             className="ml-2 p-1 text-primary hover:bg-primary/10 rounded-full"
                           >
                             <CheckIcon className="w-4 h-4" />
@@ -149,6 +142,25 @@ export const DashboardLayout = ({
       </AnimatePresence>
     </div>
   );
+};
+
+export const DashboardLayout = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
+  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch notifications when component mounts
+    dispatch(fetchNotifications());
+  }, [dispatch]);
+
+  const isSeller = user?.accountType === "seller";
 
   const SidebarLink = ({ item }: { item: SidebarItem }) => (
     <Link

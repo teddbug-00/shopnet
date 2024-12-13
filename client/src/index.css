@@ -1,6 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+.dark .glass-panel {
+    background: rgba(28, 28, 30, 0.7);
+}
 
 @layer base {
     html {
@@ -63,49 +75,64 @@
     transition-all duration-200
     disabled:opacity-50 disabled:cursor-not-allowed;
     }
-
-    .card {
-        @apply bg-white dark:bg-[#1C1C1E]
-    rounded-2xl
-    shadow-apple dark:shadow-apple-dark
-    border border-gray-200/10 dark:border-gray-800/10
-    transition-all duration-200;
-    }
-}
-
-/* Apple-style transitions */
-.fade-enter {
-    opacity: 0;
-    transform: scale(0.95);
-}
-
-.fade-enter-active {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-        opacity 200ms ease-out,
-        transform 200ms ease-out;
-}
-
-.fade-exit {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.fade-exit-active {
-    opacity: 0;
-    transform: scale(0.95);
-    transition:
-        opacity 200ms ease-out,
-        transform 200ms ease-out;
 }
 
 @layer utilities {
-    .-z-1 {
-        z-index: -1;
+    .backdrop-blur-apple {
+        @apply bg-white/60 dark:bg-gray-800/60;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    .scrollbar-apple {
+        scrollbar-width: thin;
+        scrollbar-gutter: stable;
+        transition: all 0.2s ease;
+    }
+
+    .scrollbar-apple::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
+    }
+
+    .scrollbar-apple::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+
+    .scrollbar-apple::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(156, 163, 175, 0.7);
+    }
+
+    .dark .scrollbar-apple::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 85, 99, 0.5);
+    }
+
+    .dark .scrollbar-apple::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(75, 85, 99, 0.7);
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .show-scrollbar:hover {
+        scrollbar-width: thin;
+    }
+
+    .show-scrollbar:hover::-webkit-scrollbar {
+        display: block;
     }
 }
 
+/* Custom Styles */
 #root {
     isolation: isolate;
     min-height: 100vh;
@@ -118,9 +145,9 @@ body {
     background: transparent !important;
 }
 
-/* Customize NProgress bar */
+/* NProgress Customization */
 #nprogress .bar {
-    background: #007aff !important; /* Use your primary color */
+    background: #007aff !important;
     height: 3px !important;
 }
 
@@ -128,16 +155,4 @@ body {
     box-shadow:
         0 0 10px #007aff,
         0 0 5px #007aff !important;
-}
-
-@keyframes gradient {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
 }

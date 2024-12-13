@@ -34,6 +34,48 @@ async function main() {
         type: "ACCOUNT",
         read: false,
       },
+      {
+        userId: user.id,
+        title: "Welcome to ShopNet!",
+        message: "Thanks for joining. Start exploring our features now.",
+        type: "SYSTEM",
+        read: false,
+      },
+      {
+        userId: user.id,
+        title: "New Product Feature",
+        message: "You can now add multiple images to your products.",
+        type: "SYSTEM",
+        read: false,
+      },
+      {
+        userId: user.id,
+        title: "Profile Update Reminder",
+        message: "Don't forget to complete your profile information.",
+        type: "ACCOUNT",
+        read: false,
+      },
+      {
+        userId: user.id,
+        title: "Welcome to ShopNet!",
+        message: "Thanks for joining. Start exploring our features now.",
+        type: "SYSTEM",
+        read: false,
+      },
+      {
+        userId: user.id,
+        title: "New Product Feature",
+        message: "You can now add multiple images to your products.",
+        type: "SYSTEM",
+        read: false,
+      },
+      {
+        userId: user.id,
+        title: "Profile Update Reminder",
+        message: "Don't forget to complete your profile information.",
+        type: "ACCOUNT",
+        read: false,
+      },
     ],
   });
 

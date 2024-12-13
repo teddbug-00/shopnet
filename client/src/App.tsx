@@ -22,6 +22,8 @@ import { AddProduct } from "./pages/AddProduct";
 import { ProductDetails } from "./pages/ProductDetails";
 import { EditProduct } from "./pages/EditProduct";
 import { Products } from "./pages/Products";
+import { NotificationsView } from "./components/notifications/NotificationsView";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 function App() {
   const location = useLocation();
@@ -38,7 +40,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="w-full min-h-screen relative overflow-hidden flex flex-col">
+      <div className="w-full min-h-screen relative overflow-hidden flex flex-col bg-gray-50/90 dark:bg-gray-900/90">
         <Background />
         <div className="relative z-10 flex-1">
           <AnimatePresence mode="wait">
@@ -110,6 +112,16 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <EditProduct />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/notifications"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <NotificationsView />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 }
               />

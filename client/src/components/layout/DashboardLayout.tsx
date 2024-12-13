@@ -13,13 +13,8 @@ import {
   BellIcon,
   Bars3Icon,
   XMarkIcon,
-  CheckIcon,
 } from "@heroicons/react/24/outline";
-import {
-  fetchNotifications,
-  markAsRead,
-  markAllAsRead,
-} from "../../features/notifications/notificationsSlice";
+import { fetchNotifications } from "../../features/notifications/notificationsSlice";
 
 interface SidebarItem {
   name: string;
@@ -35,112 +30,21 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const NotificationsButton = () => {
-  const dispatch = useAppDispatch();
-  const {
-    items: notifications,
-    unreadCount,
-    isLoading,
-    error,
-  } = useAppSelector((state) => state.notifications);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-
-  console.log("Notifications State:", {
-    notifications,
-    unreadCount,
-    isLoading,
-    error,
-  });
+  const navigate = useNavigate();
+  const { unreadCount } = useAppSelector((state) => state.notifications);
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-      >
-        <BellIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-        {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-            {unreadCount}
-          </span>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {isNotificationsOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
-            >
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h3 className="font-semibold">Notifications</h3>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={() => dispatch(markAllAsRead())}
-                    className="text-sm text-primary hover:text-primary-dark"
-                  >
-                    Mark all as read
-                  </button>
-                )}
-              </div>
-
-              <div className="max-h-96 overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    No notifications
-                  </div>
-                ) : (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-gray-200 dark:border-gray-700 last:border-0 ${
-                        !notification.read
-                          ? "bg-primary/5 dark:bg-primary/10"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <p className="font-medium">{notification.title}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(
-                              notification.createdAt,
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-                        {!notification.read && (
-                          <button
-                            onClick={() =>
-                              dispatch(markAsRead(notification.id))
-                            }
-                            className="ml-2 p-1 text-primary hover:bg-primary/10 rounded-full"
-                          >
-                            <CheckIcon className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
-              onClick={() => setIsNotificationsOpen(false)}
-            />
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+    <button
+      onClick={() => navigate("/dashboard/notifications")}
+      className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+    >
+      <BellIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+      {unreadCount > 0 && (
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center animate-pulse">
+          {unreadCount}
+        </span>
+      )}
+    </button>
   );
 };
 
@@ -199,7 +103,7 @@ export const DashboardLayout = ({
                 )}
               </button>
 
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold ml-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium ml-4">
                 SN
               </div>
             </div>

@@ -55,8 +55,3 @@ PORT=5000
 DATABASE_URL="postgresql://user:password@localhost:5432/shopnet"
 JWT_SECRET="your_generated_secret"
 ```
-
-⚠️ **Important**:
-- Never commit your `.env` file to version control
-- Each developer should generate their own JWT secret for local development
-- Production environments should use a different, secure JWT secret

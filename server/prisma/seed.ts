@@ -3,7 +3,7 @@ import { PrismaClient, NotificationType } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Replace with an actual user ID from your database
+
   const user = await prisma.user.findFirst();
 
   if (!user) {

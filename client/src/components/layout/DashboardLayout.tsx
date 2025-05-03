@@ -15,6 +15,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { fetchNotifications } from "../../features/notifications/notificationsSlice";
+import { CartDropdown } from "../cart/CartDropdown";
 
 interface SidebarItem {
   name: string;
@@ -109,6 +110,7 @@ export const DashboardLayout = ({
             </div>
 
             <div className="flex items-center space-x-4">
+              <CartDropdown />
               <NotificationsButton />
               <ThemeToggle />
               <Avatar />

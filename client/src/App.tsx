@@ -24,6 +24,7 @@ import { EditProduct } from "./pages/EditProduct";
 import { Products } from "./pages/Products";
 import { NotificationsView } from "./components/notifications/NotificationsView";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+import Checkout from "./pages/Checkout";
 
 function App() {
   const location = useLocation();
@@ -125,6 +126,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              {/* <Route
+                path="/order-confirmation"
+                element={
+                  <ProtectedRoute>
+                    <OrderConfirmation />
+                  </ProtectedRoute>
+                }
+              /> */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

@@ -1,4 +1,5 @@
 import { SelectHTMLAttributes, forwardRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -12,15 +13,23 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="space-y-1">
         {label && (
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {label}
           </label>
         )}
         <select
           ref={ref}
           className={`
-            input-field appearance-none bg-white
-            ${error ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}
+            block w-full rounded-lg border pl-4 pr-10 py-2 text-sm
+            shadow-sm
+            appearance-none bg-white dark:bg-gray-900
+            ${error 
+              ? 'border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500' 
+              : 'border-gray-300 dark:border-gray-700 focus:ring-primary/20 focus:border-primary dark:focus:border-primary'
+            }
+            focus:outline-none focus:ring-2
+            text-gray-900 dark:text-white
+            disabled:bg-gray-50 dark:disabled:bg-gray-800/50 disabled:opacity-70 disabled:cursor-not-allowed
             ${className}
           `}
           {...props}
@@ -31,14 +40,21 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {(error || helper) && (
-          <p className={`text-sm ${error ? 'text-danger' : 'text-gray-500'}`}>
-            {error || helper}
-          </p>
-        )}
+        <AnimatePresence>
+          {(error || helper) && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`text-sm ${error ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              {error || helper}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
 );
 
-Select.displayName = 'Select'; 
+Select.displayName = 'Select';

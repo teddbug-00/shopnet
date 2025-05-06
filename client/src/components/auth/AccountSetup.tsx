@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../common/Card";
@@ -10,10 +10,12 @@ import { slideUp } from "../../utils/animations";
 import { updateAccountType } from "../../features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { AccountSetupData, UserType } from "../../types/auth";
-import { Alert } from "../common/Alert";
 import { BuildingOfficeIcon } from "@heroicons/react/24/outline";
 import { PhoneIcon } from "@heroicons/react/24/outline";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import { useSnackbar } from "../../context/SnackbarContext";
+
+// Rest of the imports remain the same...
 
 interface BusinessFormData {
   businessName: string;
@@ -49,6 +51,14 @@ export const AccountSetup = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { error } = useAppSelector((state) => state.auth);
+  const { showSnackbar } = useSnackbar();
+
+  // Show error snackbar if there's an error
+  useEffect(() => {
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [error, showSnackbar]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [accountType, setAccountType] = useState<UserType | null>(null);
@@ -120,7 +130,14 @@ export const AccountSetup = () => {
   };
 
   const handleNext = (): void => {
-    if (currentStep === 1 && !validateForm()) return;
+    if (currentStep === 1 && !validateForm()) {
+      // Show validation errors in snackbar
+      const errorMessages = Object.values(errors).filter(Boolean);
+      if (errorMessages.length > 0) {
+        showSnackbar(errorMessages[0], "error");
+      }
+      return;
+    }
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -129,7 +146,14 @@ export const AccountSetup = () => {
   };
 
   const handleComplete = async (): Promise<void> => {
-    if (!validateForm() || !accountType) return;
+    if (!validateForm() || !accountType) {
+      // Show validation errors in snackbar
+      const errorMessages = Object.values(errors).filter(Boolean);
+      if (errorMessages.length > 0) {
+        showSnackbar(errorMessages[0], "error");
+      }
+      return;
+    }
 
     try {
       const setupData: AccountSetupData = {
@@ -154,233 +178,15 @@ export const AccountSetup = () => {
       const result = await dispatch(updateAccountType(setupData));
 
       if (updateAccountType.fulfilled.match(result)) {
+        showSnackbar("Account setup completed successfully!", "success");
         navigate("/dashboard");
       }
     } catch (err) {
       console.error("Setup failed:", err);
+      showSnackbar("Account setup failed. Please try again.", "error");
     }
   };
 
-  const renderAccountTypeSelection = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setAccountType("buyer")}
-          className={`
-            p-6 rounded-xl border-2 text-center transition-colors
-            ${
-              accountType === "buyer"
-                ? "border-primary bg-primary/5"
-                : "border-gray-200 dark:border-gray-800 hover:border-primary/50"
-            }
-          `}
-        >
-          <h3 className="text-lg font-semibold mb-2">Buyer</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            I want to purchase products
-          </p>
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setAccountType("seller")}
-          className={`
-            p-6 rounded-xl border-2 text-center transition-colors
-            ${
-              accountType === "seller"
-                ? "border-primary bg-primary/5"
-                : "border-gray-200 dark:border-gray-800 hover:border-primary/50"
-            }
-          `}
-        >
-          <h3 className="text-lg font-semibold mb-2">Seller</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            I want to sell products
-          </p>
-        </motion.button>
-      </div>
-
-      <Button fullWidth onClick={handleNext} disabled={!accountType}>
-        Continue
-      </Button>
-    </div>
-  );
-
-  const renderBuyerDetails = () => (
-    <div className="space-y-6">
-      <Input
-        label="Phone Number"
-        name="phone"
-        type="tel"
-        value={buyerFormData.phone}
-        onChange={handleInputChange}
-        error={errors.phone}
-        leftIcon={<PhoneIcon className="w-5 h-5" />}
-        required
-      />
-
-      <Input
-        label="Delivery Address"
-        name="address"
-        value={buyerFormData.address}
-        onChange={handleInputChange}
-        error={errors.address}
-        leftIcon={<MapPinIcon className="w-5 h-5" />}
-        required
-      />
-
-      <div className="space-y-2">
-        <label className="block text-sm text-gray-700 dark:text-gray-300">
-          Shopping Preferences (Optional)
-        </label>
-        <textarea
-          name="preferences"
-          value={buyerFormData.preferences}
-          onChange={handleInputChange}
-          rows={4}
-          className="input-field"
-          placeholder="Tell us what kind of products you're interested in"
-        />
-      </div>
-
-      <div className="flex space-x-4">
-        <Button variant="secondary" onClick={handleBack}>
-          Back
-        </Button>
-        <Button fullWidth onClick={handleNext}>
-          Continue
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderBusinessDetails = () => (
-    <div className="space-y-6">
-      <Input
-        label="Business Name"
-        name="businessName"
-        value={businessFormData.businessName}
-        onChange={handleInputChange}
-        error={errors.businessName}
-        leftIcon={<BuildingOfficeIcon className="w-5 h-5" />}
-        required
-      />
-
-      <div className="space-y-2">
-        <label className="block text-sm text-gray-700 dark:text-gray-300">
-          Business Description
-        </label>
-        <textarea
-          name="businessDescription"
-          value={businessFormData.businessDescription}
-          onChange={handleInputChange}
-          rows={4}
-          className="input-field pl-10"
-          placeholder="Tell us about your business"
-        />
-      </div>
-
-      <Input
-        label="Phone Number"
-        name="phone"
-        type="tel"
-        value={businessFormData.phone}
-        onChange={handleInputChange}
-        error={errors.phone}
-        leftIcon={<PhoneIcon className="w-5 h-5" />}
-        required
-      />
-
-      <Input
-        label="Business Address"
-        name="address"
-        value={businessFormData.address}
-        onChange={handleInputChange}
-        error={errors.address}
-        leftIcon={<MapPinIcon className="w-5 h-5" />}
-        required
-      />
-
-      <div className="flex space-x-4">
-        <Button variant="secondary" onClick={handleBack}>
-          Back
-        </Button>
-        <Button fullWidth onClick={handleNext}>
-          Continue
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderVerification = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Almost there!</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          We'll need to verify your business details before you can start
-          selling.
-        </p>
-      </div>
-
-      <div className="space-y-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Please have these documents ready:
-        </p>
-        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-2">
-          <li>Business registration document</li>
-          <li>Tax identification number</li>
-          <li>Government-issued ID</li>
-        </ul>
-      </div>
-
-      <div className="flex space-x-4">
-        <Button variant="secondary" onClick={handleBack}>
-          Back
-        </Button>
-        <Button fullWidth onClick={handleComplete}>
-          Submit for Review
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderPhoneVerification = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Verify your phone number</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          We've sent a verification code to your phone
-        </p>
-      </div>
-
-      <Input
-        label="Verification Code"
-        name="verificationCode"
-        type="text"
-        placeholder="Enter 6-digit code"
-        maxLength={6}
-        className="text-center text-2xl tracking-wider"
-      />
-
-      <div className="text-center">
-        <button className="text-sm text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors">
-          Didn't receive the code? Resend
-        </button>
-      </div>
-
-      <div className="flex space-x-4">
-        <Button variant="secondary" onClick={handleBack}>
-          Back
-        </Button>
-        <Button fullWidth onClick={handleComplete}>
-          Complete Setup
-        </Button>
-      </div>
-    </div>
-  );
 
   return (
     <>
@@ -388,12 +194,6 @@ export const AccountSetup = () => {
       <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
         <motion.div {...slideUp} className="w-full max-w-md py-4">
           <Card className="p-8">
-            {error && (
-              <Alert variant="error" show={!!error}>
-                {error}
-              </Alert>
-            )}
-
             <div className="text-center mb-8">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 Let's set up your account
@@ -439,4 +239,236 @@ export const AccountSetup = () => {
       </div>
     </>
   );
+
+  function renderAccountTypeSelection() {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setAccountType("buyer")}
+            className={`
+              p-6 rounded-xl border-2 text-center transition-colors
+              ${
+                accountType === "buyer"
+                  ? "border-primary bg-primary/5"
+                  : "border-gray-200 dark:border-gray-800 hover:border-primary/50"
+              }
+            `}
+          >
+            <h3 className="text-lg font-semibold mb-2">Buyer</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              I want to purchase products
+            </p>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setAccountType("seller")}
+            className={`
+              p-6 rounded-xl border-2 text-center transition-colors
+              ${
+                accountType === "seller"
+                  ? "border-primary bg-primary/5"
+                  : "border-gray-200 dark:border-gray-800 hover:border-primary/50"
+              }
+            `}
+          >
+            <h3 className="text-lg font-semibold mb-2">Seller</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              I want to sell products
+            </p>
+          </motion.button>
+        </div>
+
+        <Button fullWidth onClick={handleNext} disabled={!accountType}>
+          Continue
+        </Button>
+      </div>
+    );
+  }
+
+  function renderBuyerDetails() {
+    return (
+      <div className="space-y-6">
+        <Input
+          label="Phone Number"
+          name="phone"
+          type="tel"
+          value={buyerFormData.phone}
+          onChange={handleInputChange}
+          error={errors.phone}
+          leftIcon={<PhoneIcon className="w-5 h-5" />}
+          required
+        />
+
+        <Input
+          label="Delivery Address"
+          name="address"
+          value={buyerFormData.address}
+          onChange={handleInputChange}
+          error={errors.address}
+          leftIcon={<MapPinIcon className="w-5 h-5" />}
+          required
+        />
+
+        <div className="space-y-2">
+          <label className="block text-sm text-gray-700 dark:text-gray-300">
+            Shopping Preferences (Optional)
+          </label>
+          <textarea
+            name="preferences"
+            value={buyerFormData.preferences}
+            onChange={handleInputChange}
+            rows={4}
+            className="input-field"
+            placeholder="Tell us what kind of products you're interested in"
+          />
+        </div>
+
+        <div className="flex space-x-4">
+          <Button variant="secondary" onClick={handleBack}>
+            Back
+          </Button>
+          <Button fullWidth onClick={handleNext}>
+            Continue
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderBusinessDetails() {
+    return (
+      <div className="space-y-6">
+        <Input
+          label="Business Name"
+          name="businessName"
+          value={businessFormData.businessName}
+          onChange={handleInputChange}
+          error={errors.businessName}
+          leftIcon={<BuildingOfficeIcon className="w-5 h-5" />}
+          required
+        />
+
+        <div className="space-y-2">
+          <label className="block text-sm text-gray-700 dark:text-gray-300">
+            Business Description
+          </label>
+          <textarea
+            name="businessDescription"
+            value={businessFormData.businessDescription}
+            onChange={handleInputChange}
+            rows={4}
+            className="input-field pl-10"
+            placeholder="Tell us about your business"
+          />
+        </div>
+
+        <Input
+          label="Phone Number"
+          name="phone"
+          type="tel"
+          value={businessFormData.phone}
+          onChange={handleInputChange}
+          error={errors.phone}
+          leftIcon={<PhoneIcon className="w-5 h-5" />}
+          required
+        />
+
+        <Input
+          label="Business Address"
+          name="address"
+          value={businessFormData.address}
+          onChange={handleInputChange}
+          error={errors.address}
+          leftIcon={<MapPinIcon className="w-5 h-5" />}
+          required
+        />
+
+        <div className="flex space-x-4">
+          <Button variant="secondary" onClick={handleBack}>
+            Back
+          </Button>
+          <Button fullWidth onClick={handleNext}>
+            Continue
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderVerification() {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">Almost there!</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            We'll need to verify your business details before you can start
+            selling.
+          </p>
+        </div>
+
+        <div className="space-y-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Please have these documents ready:
+          </p>
+          <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <li>Business registration document</li>
+            <li>Tax identification number</li>
+            <li>Government-issued ID</li>
+          </ul>
+        </div>
+
+        <div className="flex space-x-4">
+          <Button variant="secondary" onClick={handleBack}>
+            Back
+          </Button>
+          <Button fullWidth onClick={handleComplete}>
+            Submit for Review
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderPhoneVerification() {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">Verify your phone number</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            We've sent a verification code to your phone
+          </p>
+        </div>
+
+        <Input
+          label="Verification Code"
+          name="verificationCode"
+          type="text"
+          placeholder="Enter 6-digit code"
+          maxLength={6}
+          className="text-center text-2xl tracking-wider"
+        />
+
+        <div className="text-center">
+          <button className="text-sm text-primary hover:text-primary-dark dark:text-primary-light dark:hover:text-primary transition-colors">
+            Didn't receive the code? Resend
+          </button>
+        </div>
+
+        <div className="flex space-x-4">
+          <Button variant="secondary" onClick={handleBack}>
+            Back
+          </Button>
+          <Button fullWidth onClick={handleComplete}>
+            Complete Setup
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
 };

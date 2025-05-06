@@ -1,23 +1,34 @@
 import { useEffect } from "react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { Card } from "../components/common/Card";
-import { Alert } from "../components/common/Alert";
 import { Tab } from "@headlessui/react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { clearSettingsState } from "../features/settings/settingsSlice";
 import { ProfilePanel } from "../components/settings/ProfilePanel";
 import { PasswordPanel } from "../components/settings/PasswordPanel";
 import { NotificationsPanel } from "../components/settings/NotificationsPanel";
+import { useSnackbar } from "../context/SnackbarContext";
 
 const Settings = () => {
   const dispatch = useAppDispatch();
   const { error, success } = useAppSelector((state) => state.settings);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     return () => {
       dispatch(clearSettingsState());
     };
   }, [dispatch]);
+
+  // Show success and error messages
+  useEffect(() => {
+    if (success) {
+      showSnackbar(success, "success");
+    }
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [success, error, showSnackbar]);
 
   const tabs = [
     { name: "Profile", component: ProfilePanel },
@@ -37,17 +48,7 @@ const Settings = () => {
           </p>
         </div>
 
-        {error && (
-          <Alert variant="error" show={!!error}>
-            {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert variant="success" show={!!success}>
-            {success}
-          </Alert>
-        )}
+        {/* Remove Alert components */}
 
         <Tab.Group>
           <Card>

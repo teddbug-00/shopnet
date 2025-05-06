@@ -1,9 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import {
   markAsRead,
   markAllAsRead,
+  fetchNotifications,
 } from "../../features/notifications/notificationsSlice";
 import {
   ArrowLeftIcon,
@@ -11,16 +13,46 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 import { formatDistanceToNow } from "date-fns";
-import { LoadingScreen } from "../common/LoadingScreen";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const NotificationsView = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { showSnackbar } = useSnackbar();
   const {
     items: notifications,
     isLoading,
     unreadCount,
+    error,
   } = useAppSelector((state) => state.notifications);
+
+  useEffect(() => {
+    dispatch(fetchNotifications());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [error, showSnackbar]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await dispatch(markAsRead(id)).unwrap();
+      showSnackbar("Notification marked as read", "success");
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to mark notification as read", "error");
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await dispatch(markAllAsRead()).unwrap();
+      showSnackbar("All notifications marked as read", "success");
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to mark all notifications as read", "error");
+    }
+  };
 
   return (
     <div className="h-[calc(100vh-theme(spacing.16))] relative">
@@ -39,7 +71,7 @@ export const NotificationsView = () => {
         </div>
         {unreadCount > 0 && (
           <button
-            onClick={() => dispatch(markAllAsRead())}
+            onClick={handleMarkAllAsRead}
             className="text-sm text-primary hover:text-primary-dark dark:text-primary-light transition-colors"
           >
             Mark all as read
@@ -99,7 +131,7 @@ export const NotificationsView = () => {
                 </div>
                 {!notification.read && (
                   <button
-                    onClick={() => dispatch(markAsRead(notification.id))}
+                    onClick={() => handleMarkAsRead(notification.id)}
                     className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                   >
                     <CheckIcon className="w-5 h-5 text-primary dark:text-primary-light" />

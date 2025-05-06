@@ -3,10 +3,12 @@ import { Input } from "../common/Input";
 import { Button } from "../common/Button";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { changePassword } from "../../features/settings/settingsSlice";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const PasswordPanel = () => {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.settings);
+  const { showSnackbar } = useSnackbar();
 
   const [passwordSettings, setPasswordSettings] = useState({
     currentPassword: "",
@@ -46,6 +48,13 @@ export const PasswordPanel = () => {
     }
 
     setPasswordErrors(errors);
+    
+    // Show first error in snackbar if any
+    const errorMessages = Object.values(errors).filter(Boolean);
+    if (errorMessages.length > 0) {
+      showSnackbar(errorMessages[0], "error");
+    }
+    
     return !Object.values(errors).some((error) => error !== "");
   };
 
@@ -66,6 +75,7 @@ export const PasswordPanel = () => {
         newPassword: "",
         confirmPassword: "",
       });
+      showSnackbar("Password updated successfully", "success");
     }
   };
 

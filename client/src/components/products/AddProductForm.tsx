@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { Card } from "../common/Card";
 import { Input } from "../common/Input";
 import { Select } from "../common/Select";
 import { Button } from "../common/Button";
-import { Alert } from "../common/Alert";
 import { createProduct } from "../../features/products/productsSlice";
 import { uploadImage } from "../../utils/imageService";
 import {
@@ -14,6 +13,7 @@ import {
   XMarkIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const CONDITION_OPTIONS = [
   { value: "new", label: "Brand New" },
@@ -61,6 +61,15 @@ interface ProductFormData {
 export const AddProductForm = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { error } = useAppSelector((state) => state.products);
+  const { showSnackbar } = useSnackbar();
+
+  // Show product creation errors
+  useEffect(() => {
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [error, showSnackbar]);
 
   const [formData, setFormData] = useState<ProductFormData>({
     title: "",
@@ -85,7 +94,6 @@ export const AddProductForm = () => {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagesPreviews, setImagesPreviews] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentFeature, setCurrentFeature] = useState("");
 
   const handleChange = (
@@ -114,7 +122,7 @@ export const AddProductForm = () => {
       });
 
       if (validFiles.length !== newFiles.length) {
-        setError("Some files were skipped. Images must be under 5MB.");
+        showSnackbar("Some files were skipped. Images must be under 5MB.", "warning");
       }
 
       // Create preview URLs
@@ -176,7 +184,6 @@ export const AddProductForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUploading(true);
-    setError(null);
 
     try {
       // Validate form
@@ -192,16 +199,17 @@ export const AddProductForm = () => {
       const result = await dispatch(
         createProduct({
           ...formData,
-          price: parseFloat(formData.price),
+          price: formData.price,
           images: uploadedUrls,
         }),
       );
 
       if (createProduct.fulfilled.match(result)) {
-        navigate("/dashboard");
+        showSnackbar("Product created successfully!", "success");
+        navigate("/dashboard/products");
       }
     } catch (error: any) {
-      setError(error.message || "Failed to create product. Please try again.");
+      showSnackbar(error.message || "Failed to create product. Please try again.", "error");
     } finally {
       setIsUploading(false);
     }
@@ -211,12 +219,6 @@ export const AddProductForm = () => {
     <div className="max-w-4xl mx-auto py-8">
       <Card className="p-8">
         <h2 className="text-2xl font-bold mb-6">Add New Product</h2>
-
-        {error && (
-          <Alert variant="error" show={!!error}>
-            {error}
-          </Alert>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}

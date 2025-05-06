@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Button } from "../common/Button";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { updateNotificationPreferences } from "../../features/settings/settingsSlice";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const NotificationsPanel = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { isLoading } = useAppSelector((state) => state.settings);
+  const { showSnackbar } = useSnackbar();
 
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: user?.profile?.emailNotifications ?? true,
@@ -23,11 +25,17 @@ export const NotificationsPanel = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dispatch(updateNotificationPreferences(notificationSettings));
+    try {
+      await dispatch(updateNotificationPreferences(notificationSettings));
+      showSnackbar("Notification preferences updated successfully", "success");
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to update notification preferences", "error");
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* The form content remains the same */}
       <div className="space-y-4">
         {/* Email Notifications Toggle */}
         <div className="flex items-center justify-between">

@@ -6,12 +6,14 @@ import { removeFromCart, updateQuantity } from "../../features/cart/cartSlice";
 import { Button } from "../common/Button";
 import { formatCurrency } from "../../utils/formatters";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const CartDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { items } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce(
@@ -19,12 +21,19 @@ export const CartDropdown = () => {
     0
   );
   
-  const handleRemoveItem = (productId: string) => {
+  const handleRemoveItem = (productId: string, productName: string) => {
     dispatch(removeFromCart(productId));
+    showSnackbar(`${productName} removed from cart`, "info");
   };
   
-  const handleQuantityChange = (productId: string, quantity: number) => {
+  const handleQuantityChange = (productId: string, quantity: number, currentQty: number) => {
     dispatch(updateQuantity({ productId, quantity }));
+    
+    if (quantity > currentQty) {
+      showSnackbar("Quantity increased", "success");
+    } else {
+      showSnackbar("Quantity decreased", "info");
+    }
   };
   
   const handleCheckout = () => {
@@ -100,21 +109,21 @@ export const CartDropdown = () => {
                           <div className="flex items-center mt-1">
                             <button
                               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                              onClick={() => handleQuantityChange(item.product.id, Math.max(1, item.quantity - 1))}
+                              onClick={() => handleQuantityChange(item.product.id, Math.max(1, item.quantity - 1), item.quantity)}
                             >
                               -
                             </button>
                             <span className="mx-2 text-sm">{item.quantity}</span>
                             <button
                               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                              onClick={() => handleQuantityChange(item.product.id, item.quantity + 1)}
+                              onClick={() => handleQuantityChange(item.product.id, item.quantity + 1, item.quantity)}
                             >
                               +
                             </button>
                           </div>
                         </div>
                         <button
-                          onClick={() => handleRemoveItem(item.product.id)}
+                          onClick={() => handleRemoveItem(item.product.id, item.product.title)}
                           className="text-gray-500 hover:text-red-500"
                         >
                           <TrashIcon className="w-5 h-5" />

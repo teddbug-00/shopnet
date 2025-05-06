@@ -1,29 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { register } from "../../features/auth/authSlice";
 import { Card } from "../common/Card";
 import { Input } from "../common/Input";
 import { Button } from "../common/Button";
-import { Alert } from "../common/Alert";
 import { slideUp } from "../../utils/animations";
 import { Navbar } from "../common/Navbar";
 import { RegisterCredentials } from "../../types/auth";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const Register = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { showSnackbar } = useSnackbar();
 
   const [formData, setFormData] = useState<RegisterCredentials>({
     name: "",
     email: "",
     password: "",
   });
+
+  // Show error snackbar if there's an error
+  useEffect(() => {
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [error, showSnackbar]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -74,13 +82,7 @@ export const Register = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-              <AnimatePresence>
-                {error && (
-                  <Alert variant="error" show={!!error}>
-                    {error}
-                  </Alert>
-                )}
-              </AnimatePresence>
+              {/* Remove Alert component */}
 
               <Input
                 label="Full Name"

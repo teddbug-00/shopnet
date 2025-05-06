@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Input } from "../common/Input";
 import { Button } from "../common/Button";
-import { Alert } from "../common/Alert";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { updateProfile } from "../../features/settings/settingsSlice";
 import { updateUserData } from "../../features/auth/authSlice";
 import { uploadImage } from "../../utils/imageService";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export const ProfilePanel = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { isLoading } = useAppSelector((state) => state.settings);
+  const { showSnackbar } = useSnackbar();
 
   const [profileSettings, setProfileSettings] = useState({
     name: user?.name || "",
@@ -24,18 +25,16 @@ export const ProfilePanel = () => {
     user?.profile?.profileImage || null,
   );
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setUploadError("Image size should be less than 2MB");
+        showSnackbar("Image size should be less than 2MB", "error");
         return;
       }
 
       setImageFile(file);
-      setUploadError(null);
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,7 +47,6 @@ export const ProfilePanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUploading(true);
-    setUploadError(null);
 
     try {
       let profileImageUrl = user?.profile?.profileImage;
@@ -69,9 +67,10 @@ export const ProfilePanel = () => {
       if (updateProfile.fulfilled.match(result)) {
         dispatch(updateUserData(result.payload.user));
         setImageFile(null);
+        showSnackbar("Profile updated successfully", "success");
       }
-    } catch (error) {
-      setUploadError("Failed to upload image. Please try again.");
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to update profile", "error");
     } finally {
       setIsUploading(false);
     }
@@ -79,11 +78,6 @@ export const ProfilePanel = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {uploadError && (
-        <Alert variant="error" show={!!uploadError}>
-          {uploadError}
-        </Alert>
-      )}
 
       <div className="flex items-center space-x-6">
         <div className="relative">
